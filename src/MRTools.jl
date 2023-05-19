@@ -6,7 +6,8 @@ using Reexport
 # @reexport using CategoricalArrays
 # @reexport using Clustering
 @reexport using CSV
-@reexport using DataFrames
+@reexport using DataFrames, DataFrameMacros, Dates
+@reexport using GLMakie, AlgebraOfGraphics
 @reexport using NCDatasets
 # @reexport using Distances
 @reexport using Distributions
@@ -21,7 +22,7 @@ using Reexport
 @reexport using StatsBase
 # @reexport using TimeSeries
 
-@reexport using ColorSchemes, Colors
+@reexport using ColorSchemes, Colors, LaTeXStrings
 @reexport using LsqFit, ForwardDiff
 @reexport using SplitApplyCombine, TensorCast
 @reexport using StaticModules: @with
