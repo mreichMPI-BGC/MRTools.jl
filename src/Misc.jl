@@ -14,8 +14,12 @@ end
 flat(arr) = mapreduce(x -> x == [] || x[1] === x ? x : flat(x), vcat, arr, init=[])
 
 
-oknum(x::Number) = !ismissing(x) && isfinite(x)
+oknum(x::Union{Number, Missing}) = !ismissing(x) && isfinite(x)
 oknum(x::String) = !ismissing(x) && !isequal(x, "")
+
+nok2miss(x::Union{Number, Missing}) = oknum(x) ? x : missing
+nok2miss!(df::DataFrame) = @transform! df {} = nok2miss({names(df, Number)})
+miss2nan!(df::DataFrame) =  @transform!(df, {} = coalesce({names(df, Union{Missing, Number})}, NaN)) |> disallowmissing!
 
 ok_frac(x::AbstractArray) = sum(oknum.(x))/length(x)
 

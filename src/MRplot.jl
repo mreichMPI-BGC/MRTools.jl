@@ -66,5 +66,5 @@ HDFigure() = Figure(; resolution=(1920, 1080))
 one2one(; color=:grey, linestyle=:dash, kw...) =  mapping([0], [1]) * visual(ABLines; color, linestyle, kw...)
 
 function evalplot(df, model::Symbol, obs::Symbol; kw...)
-  data(df) * mapping(model, obs) * (visual(Scatter; kw... ) + linear()) + one2one()
+  data(df) * mapping(model, obs; kw...) * (visual(Scatter; kw... ) + linear()) + one2one()
 end

@@ -5,6 +5,8 @@ import Downloads, Shapefile, Extents
 #terra = rimport("terra")
 #using .terra: rast, ext, project
 
+export countryRaster
+
 hrev(x::Array) = reverse(x; dims=2)
 
 function countryRaster(; res=0.5)
