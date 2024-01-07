@@ -1,4 +1,5 @@
 #using Missings
+using DataFrames, DataFrameMacros, Chain
 
 catchCondition(f; condition=isempty,  default=missing) = x -> condition(x) ? default : f(x)
 catchAny(f; condition=isempty,  default=missing) = x -> condition(x) ? default : try f(x) catch e  default end
@@ -13,7 +14,7 @@ end
 # Flatten a nested array (from discourse)
 flat(arr) = mapreduce(x -> x == [] || x[1] === x ? x : flat(x), vcat, arr, init=[])
 
-
+export oknum, miss2nan!
 oknum(x::Union{Number, Missing}) = !ismissing(x) && isfinite(x)
 oknum(x::String) = !ismissing(x) && !isequal(x, "")
 
@@ -56,6 +57,7 @@ function unnest_dfcol(df::DataFrame, col; appendName=true)
     return [gr_expand unnested]
 end
 
+export unnest
 function unnest(df::DataFrame, col; appendName=true)
     dfNew = select(df, col => AsTable) 
     appendName && rename!(x-> string(col) * "_" * x, dfNew)

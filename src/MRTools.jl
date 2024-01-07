@@ -1,6 +1,6 @@
 module MRTools
 
-using Reexport
+#using Reexport
 # @reexport using RCall
 # @reexport using Bootstrap
 # @reexport using CategoricalArrays
@@ -9,12 +9,12 @@ using Reexport
 # @reexport using DataFrames, DataFrameMacros, Dates
 # @reexport using GLMakie, AlgebraOfGraphics
 # @reexport using NCDatasets
-## @reexport using Distances
+# @reexport using Distances
 # @reexport using Distributions
 # @reexport using GLM
 # @reexport using HypothesisTests
 # @reexport using KernelDensity
-#@reexport using Loess
+# @reexport using Loess
 # @reexport using MixedModels
 # @reexport using MultivariateStats
 # @reexport using ShiftedArrays
@@ -33,9 +33,13 @@ using Reexport
 
 
 # Write your package code here.
-using DataFrames, DataFrameMacros, Dates
-using Chain: @chain
-foreach(include,  ["Misc.jl", "MR_geo.jl", "MRplot.jl", "MR_io.jl", "MRstat.jl"])
+#foreach(include,  ["Misc.jl", "MR_geo.jl", "MRplot.jl", "MR_io.jl", "MRstat.jl"])
+include("Misc.jl")
+include("MRplot.jl")
+include("MR_io.jl")
+include("MR_geo.jl")
+include("MRstat.jl")
+
 
 # for n in names(@__MODULE__; all=true)
 #     if Base.isidentifier(n) && n ∉ (Symbol(@__MODULE__), :eval, :include)

@@ -3,14 +3,7 @@ using SplitApplyCombine, TensorCast
 using StaticModules: @with
 using ImageFiltering
 using Zygote: @adjoint
-#using RCall: @R_str, rcopy
 ### Loss functions
-
-function msemissloss(yp, y)
-    res2=(yp.-y).^2
-    mean(filter(isfinite, res2))
-end
-
 function qloss(yp, y, prob=0.5f0)
    # mean(((y .< yp) .- prob) .* (yp .- y))
    dev = yp .- y 
@@ -100,19 +93,6 @@ function lsqFitBands(model::Function, x, fit::LsqFit.LsqFitResult, alpha=0.05; p
     return sqrt(c*rss(fit)/dof(fit))*critical_values
 end
 
-# function loess2Dsurf_R(x,y,z)
-#     df=DataFrame(;x,y,z)
-#     R"""
-#     d <- $df
-#     model= loess(z ~ x + y, d, span=0.2)
-#     xs = seq(min(d$x), max(d$x), length.out=30)
-#     ys = seq(min(d$y), max(d$y), length.out=30)
-#     gr = expand.grid(xs, ys); names(gr)  <- c("x", "y")
-#     res = list(xs, ys, predict(model, gr))
-#     """ |> rcopy
-
-# end
-
 function trimReplace!(x; trimFrac=0.0, mode="NaN", kwargs...)
     if trimFrac > 0.0
         qunts = quantile(filter(!isnan, x), (trimFrac / 2.0, 1.0 - trimFrac / 2.0))
@@ -158,22 +138,18 @@ function loess4Miss(x, y; span=0.3, useR=false, kwargs...)
     end
 end
 
-
+export regBivar
 regBivar(x,y) = regBivar(x,y,lm)
 #regBivar(x,y, fun) = @c fun([fill(1, length(x)) x], y) coef() NamedTuple(zip(string(fun) .* ["_inter", "_slope"] .|> Symbol, _ ))
-function regBivar(x,y, fun) 
-    df = DataFrame(x=x, y=y; copycols=false) |> dropmissing
-    if nrow(df) > 3 
-        coefs = fun(@formula(y ~ 1 + x), df) |> coef
-    else
-        coefs = [NaN64, NaN64]
-    end
-    
-    NamedTuple(zip(string(fun) .* ["_inter", "_slope"] .|> Symbol, coefs ))
+regBivar(x,y, fun) = @chain begin
+    DataFrame(x=x,y=y;copycols=false)
+    fun(@formula(y ~ 1 + x), _)
+    coef
+    NamedTuple(zip(string(fun) .* ["_inter", "_slope"] .|> Symbol, _ ))
 end
 
+export mapwindow2
 mapwindow2(fun, x,y, win)= mapwindow(x-> fun(getindex.(x,1), getindex.(x,2)), zip(x,y)|>collect, win)
-#mapwindow_n(fun, win, x...)=  zip(x...)|>collect
 
 function harmonics(period::Number, nwave::Number, fun=sin)
     function h(x)
@@ -182,31 +158,13 @@ function harmonics(period::Number, nwave::Number, fun=sin)
     return h
 end
 
-function generate_harmonics(v, nwaves; suffix="")
+export generate_harmonics
+function generate_harmonics(v, nwaves)
      mx = maximum(filter(oknum, v))
      res_sin = map(n->harmonics(mx, n, sin).(v), nwaves)
      res_cos = map(n->harmonics(mx, n, cos).(v), nwaves)
 
-     names = [string.("cos_", nwaves, suffix)..., string.("sin_", nwaves, suffix)...]
+     names = [string.("cos_", nwaves)..., string.("sin_", nwaves)...]
 
      @chain reduce(hcat, append!(res_cos, res_sin)) DataFrame(names)
 end
-
-function modeval(mod::AbstractArray{T}, obs::AbstractArray{T}) where T<:Number #where T2<:Number
-    df=DataFrame(;mod, obs) |> allowmissing
-    for col in eachcol(df)
-        replace!(col,NaN32 => missing)
-    end
-    dropmissing!(df)
-    #println(nrow(df))
-    obs=df.obs; mod=df.mod
-    res = obs .- mod
-    sdObs = std(obs, corrected=false)
-    sdMod = std(mod, corrected=false)
-    sdRatio = sdMod / sdObs
-    correl = try cor(obs, mod) catch e NaN end
-    bias = mean(res)
-    rmse = sqrt(mean(res.^2))
-    return (; correl, bias, sdRatio, sdObs, sdMod, rmse, mef=1.0 - (rmse/sdObs)^2)
-end
-
