@@ -3,7 +3,7 @@ using SplitApplyCombine, TensorCast
 using StaticModules: @with
 using ImageFiltering
 using Zygote: @adjoint
-using RCall: @R_str, rcopy
+#using RCall: @R_str, rcopy
 ### Loss functions
 
 function msemissloss(yp, y)
@@ -100,18 +100,18 @@ function lsqFitBands(model::Function, x, fit::LsqFit.LsqFitResult, alpha=0.05; p
     return sqrt(c*rss(fit)/dof(fit))*critical_values
 end
 
-function loess2Dsurf_R(x,y,z)
-    df=DataFrame(;x,y,z)
-    R"""
-    d <- $df
-    model= loess(z ~ x + y, d, span=0.2)
-    xs = seq(min(d$x), max(d$x), length.out=30)
-    ys = seq(min(d$y), max(d$y), length.out=30)
-    gr = expand.grid(xs, ys); names(gr)  <- c("x", "y")
-    res = list(xs, ys, predict(model, gr))
-    """ |> rcopy
+# function loess2Dsurf_R(x,y,z)
+#     df=DataFrame(;x,y,z)
+#     R"""
+#     d <- $df
+#     model= loess(z ~ x + y, d, span=0.2)
+#     xs = seq(min(d$x), max(d$x), length.out=30)
+#     ys = seq(min(d$y), max(d$y), length.out=30)
+#     gr = expand.grid(xs, ys); names(gr)  <- c("x", "y")
+#     res = list(xs, ys, predict(model, gr))
+#     """ |> rcopy
 
-end
+# end
 
 function trimReplace!(x; trimFrac=0.0, mode="NaN", kwargs...)
     if trimFrac > 0.0

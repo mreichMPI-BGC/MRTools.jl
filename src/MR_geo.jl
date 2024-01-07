@@ -1,4 +1,4 @@
-using RCall
+#using RCall
 import Rasters
 import Downloads, Shapefile, Extents
 #@rlibrary terra
@@ -19,18 +19,18 @@ function countryRaster(; res=0.5)
 end
 
 
-function proj(grid, outcrs="+proj=robin +datum=WGS84")# +units=m +no_defs")
-    #grid = permutedims(grid, (2,1))
-    jras = R"""
-        require(terra)
-        rast($(permutedims(grid, (2,1))), crs = "+proj=longlat +datum=WGS84 +no_defs", extent=ext(rast())) %>% project($outcrs) %>% as.matrix(wide=T) 
-    """ |> rcopy
-    return permutedims(jras, (2,1))
-end
+# function proj(grid, outcrs="+proj=robin +datum=WGS84")# +units=m +no_defs")
+#     #grid = permutedims(grid, (2,1))
+#     jras = R"""
+#         require(terra)
+#         rast($(permutedims(grid, (2,1))), crs = "+proj=longlat +datum=WGS84 +no_defs", extent=ext(rast())) %>% project($outcrs) %>% as.matrix(wide=T) 
+#     """ |> rcopy
+#     return permutedims(jras, (2,1))
+# end
 
 
- dem05() = R"""load(file="D:\\markusr\\daten\\geodata\\globalDEM0.5deg.rda"); globalDEM0.5deg %>% as.matrix()""" |> 
-         rcopy  .|> Float32 |> rotr90
+#  dem05() = R"""load(file="D:\\markusr\\daten\\geodata\\globalDEM0.5deg.rda"); globalDEM0.5deg %>% as.matrix()""" |> 
+#          rcopy  .|> Float32 |> rotr90
 
 
 
